@@ -1,0 +1,1 @@
+{"vertices":{"Charlie":[],"Abby":[{"to":"Ben","relationship":"mother"},{"to":"Charlie","relationship":"grandmother"}],"Ben":[{"to":"Charlie","relationship":"father"}]}}
