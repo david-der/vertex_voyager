@@ -1,1 +1,1 @@
-{"vertices":{"X":[{"to":"Y","relationship":"friends","weight":1.0}],"Y":[{"to":"X","relationship":"friends","weight":1.0},{"to":"Z","relationship":"friends","weight":1.0}],"Z":[{"to":"Y","relationship":"friends","weight":1.0}]},"directed":false}
+{"vertices":{"Z":[{"to":"Y","relationship":"friends","weight":1.0}],"X":[{"to":"Y","relationship":"friends","weight":1.0}],"Y":[{"to":"X","relationship":"friends","weight":1.0},{"to":"Z","relationship":"friends","weight":1.0}]},"directed":false}

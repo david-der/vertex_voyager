@@ -39,7 +39,7 @@ pub struct Graph {
 ## Edge Structure
 The Edge struct represents connections between vertices:
 
-```
+```rust
 pub struct Edge {
     pub to: String,
     pub relationship: String,
@@ -74,7 +74,7 @@ pub struct Edge {
 ## Usage Example
 Here's a basic example of how to use VertexVoyager:
 
-```
+```rust
 let mut graph = Graph::new(true);  // Create a directed graph
 
 graph.add_vertex("A");
@@ -100,6 +100,41 @@ To run the project:
 - Navigate to the project directory.
 - Run `cargo build` to compile the project.
 - Run `cargo run` to execute the main function, which demonstrates various features of the graph database.
+
+Example output from a clean run:
+
+```
+Creating a directed graph...
+
+Neighbors of A:
+  To: B, Relationship: connects, Weight: 4
+  To: D, Relationship: connects, Weight: 10
+
+Neighbors of A with 'connects' relationship:
+["B", "D"]
+
+DFS traversal:
+A B C D 
+
+BFS traversal:
+A B D C 
+
+Shortest paths from A:
+To C: 7
+To D: 9
+To A: 0
+To B: 4
+
+Loaded directed graph: Graph { vertices: {"D": [], "A": [Edge { to: "B", relationship: "connects", weight: 4.0 }, Edge { to: "D", relationship: "connects", weight: 10.0 }], "B": [Edge { to: "C", relationship: "connects", weight: 3.0 }], "C": [Edge { to: "D", relationship: "connects", weight: 2.0 }]}, directed: true }
+
+Creating an undirected graph...
+
+Neighbors of Y in undirected graph:
+  To: X, Relationship: friends, Weight: 1
+  To: Z, Relationship: friends, Weight: 1
+
+Loaded undirected graph: Graph { vertices: {"Z": [Edge { to: "Y", relationship: "friends", weight: 1.0 }], "X": [Edge { to: "Y", relationship: "friends", weight: 1.0 }], "Y": [Edge { to: "X", relationship: "friends", weight: 1.0 }, Edge { to: "Z", relationship: "friends", weight: 1.0 }]}, directed: false }
+```
 
 ## Future Improvements
 

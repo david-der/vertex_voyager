@@ -1,1 +1,1 @@
-{"vertices":{"C":[{"to":"D","relationship":"connects","weight":2.0}],"D":[],"A":[{"to":"B","relationship":"connects","weight":4.0},{"to":"D","relationship":"connects","weight":10.0}],"B":[{"to":"C","relationship":"connects","weight":3.0}]},"directed":true}
+{"vertices":{"A":[{"to":"B","relationship":"connects","weight":4.0},{"to":"D","relationship":"connects","weight":10.0}],"C":[{"to":"D","relationship":"connects","weight":2.0}],"D":[],"B":[{"to":"C","relationship":"connects","weight":3.0}]},"directed":true}
