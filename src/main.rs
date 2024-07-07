@@ -1,101 +1,83 @@
-use std::collections::HashMap;
-use std::fs;
-use serde::{Serialize, Deserialize};
-use thiserror::Error;
+mod graph;
+mod algorithms;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Edge {
-    to: String,
-    relationship: String,
-}
+use graph::Graph;
+use algorithms::{dfs, bfs, dijkstra};
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Graph {
-    vertices: HashMap<String, Vec<Edge>>,
-}
+fn main() {
+    // Create a directed graph
+    println!("Creating a directed graph...");
+    let mut directed_graph = Graph::new(true);
 
-#[derive(Debug, Error)]
-enum GraphError {
-    #[error("Failed to read from file")]
-    ReadError(#[from] std::io::Error),
-    #[error("Failed to parse JSON")]
-    ParseError(#[from] serde_json::Error),
-}
+    // Add vertices
+    directed_graph.add_vertex("A");
+    directed_graph.add_vertex("B");
+    directed_graph.add_vertex("C");
+    directed_graph.add_vertex("D");
 
-impl Graph {
-    fn new() -> Self {
-        Graph {
-            vertices: HashMap::new(),
+    // Add edges with weights
+    directed_graph.add_edge("A", "B", "connects", 4.0);
+    directed_graph.add_edge("B", "C", "connects", 3.0);
+    directed_graph.add_edge("C", "D", "connects", 2.0);
+    directed_graph.add_edge("A", "D", "connects", 10.0);
+
+    // Test get_neighbors
+    println!("\nNeighbors of A:");
+    if let Some(neighbors) = directed_graph.get_neighbors("A") {
+        for edge in neighbors {
+            println!("  To: {}, Relationship: {}, Weight: {}", edge.to, edge.relationship, edge.weight);
         }
     }
 
-    fn add_vertex(&mut self, vertex: &str) {
-        self.vertices.entry(vertex.to_string()).or_insert(Vec::new());
+    // Test get_neighbors_by_relationship
+    println!("\nNeighbors of A with 'connects' relationship:");
+    let connects_neighbors = directed_graph.get_neighbors_by_relationship("A", "connects");
+    println!("{:?}", connects_neighbors);
+
+    // Perform DFS
+    println!("\nDFS traversal:");
+    dfs(&directed_graph, "A", &mut |vertex: &str| print!("{} ", vertex));
+    println!();
+
+    // Perform BFS
+    println!("\nBFS traversal:");
+    bfs(&directed_graph, "A", &mut |vertex: &str| print!("{} ", vertex));
+    println!();
+
+    // Find shortest paths using Dijkstra's algorithm
+    println!("\nShortest paths from A:");
+    let distances = dijkstra(&directed_graph, "A");
+    for (vertex, distance) in distances {
+        println!("To {}: {}", vertex, distance);
     }
 
-    fn add_edge(&mut self, from: &str, to: &str, relationship: &str) {
-        self.vertices.entry(from.to_string()).or_insert(Vec::new()).push(Edge {
-            to: to.to_string(),
-            relationship: relationship.to_string(),
-        });
-        self.vertices.entry(to.to_string()).or_insert(Vec::new());
+    // Save and load the graph
+    directed_graph.save_to_file("directed_graph.json").expect("Failed to save directed graph");
+    let loaded_directed_graph = Graph::load_from_file("directed_graph.json").expect("Failed to load directed graph");
+    println!("\nLoaded directed graph: {:?}", loaded_directed_graph);
+
+    // Create an undirected graph
+    println!("\nCreating an undirected graph...");
+    let mut undirected_graph = Graph::new(false);
+
+    // Add vertices and edges
+    undirected_graph.add_vertex("X");
+    undirected_graph.add_vertex("Y");
+    undirected_graph.add_vertex("Z");
+    undirected_graph.add_edge("X", "Y", "friends", 1.0);
+    undirected_graph.add_edge("Y", "Z", "friends", 1.0);
+
+    // Test get_neighbors for undirected graph
+    println!("\nNeighbors of Y in undirected graph:");
+    if let Some(neighbors) = undirected_graph.get_neighbors("Y") {
+        for edge in neighbors {
+            println!("  To: {}, Relationship: {}, Weight: {}", edge.to, edge.relationship, edge.weight);
+        }
     }
 
-    fn get_neighbors(&self, vertex: &str) -> Option<&Vec<Edge>> {
-        self.vertices.get(vertex)
-    }
+    // Save and load the undirected graph
+    undirected_graph.save_to_file("undirected_graph.json").expect("Failed to save undirected graph");
+    let loaded_undirected_graph = Graph::load_from_file("undirected_graph.json").expect("Failed to load undirected graph");
+    println!("\nLoaded undirected graph: {:?}", loaded_undirected_graph);
 
-    fn get_neighbors_by_relationship(&self, vertex: &str, relationship: &str) -> Vec<&str> {
-        self.vertices.get(vertex)
-            .map(|edges| edges.iter()
-                .filter(|edge| edge.relationship == relationship)
-                .map(|edge| edge.to.as_str())
-                .collect())
-            .unwrap_or_else(Vec::new)
-    }
-
-    fn save_to_file(&self, filename: &str) -> Result<(), GraphError> {
-        let json = serde_json::to_string(self)?;
-        fs::write(filename, json)?;
-        Ok(())
-    }
-
-    fn load_from_file(filename: &str) -> Result<Self, GraphError> {
-        let json = fs::read_to_string(filename)?;
-        let graph: Graph = serde_json::from_str(&json)?;
-        Ok(graph)
-    }
-}
-
-fn main() {
-    let mut graph = Graph::new();
-
-    // Add vertices
-    graph.add_vertex("Abby");
-    graph.add_vertex("Ben");
-    graph.add_vertex("Charlie");
-
-    // Add edges with relationships
-    graph.add_edge("Abby", "Ben", "mother");
-    graph.add_edge("Ben", "Charlie", "father");
-    graph.add_edge("Abby", "Charlie", "grandmother");
-
-    // Print the graph
-    println!("Graph: {:?}", graph);
-
-    // Get all neighbors of Abby
-    if let Some(neighbors) = graph.get_neighbors("Abby") {
-        println!("All relationships of Abby: {:?}", neighbors);
-    }
-
-    // Get "mother" relationships of Abby
-    let mother_relationships = graph.get_neighbors_by_relationship("Abby", "mother");
-    println!("Mother relationships of Abby: {:?}", mother_relationships);
-
-    // Save the graph to a file
-    graph.save_to_file("graph.json").expect("Failed to save graph");
-
-    // Load the graph from the file
-    let loaded_graph = Graph::load_from_file("graph.json").expect("Failed to load graph");
-    println!("Loaded graph: {:?}", loaded_graph);
 }
